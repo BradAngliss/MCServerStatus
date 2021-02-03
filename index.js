@@ -6,7 +6,7 @@ const client = new Discord.Client();
 
 const prefix = "!";
 // const ipFormat = /^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
-const ipFormat = '/^(http(s?):\/\/)?(((www\.)?+[a-zA-Z0-9\.\-\_]+(\.[a-zA-Z]{2,3})+)|(\b(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\b))(\/[a-zA-Z0-9\_\-\s\.\/\?\%\#\&\=]*)?$/i';
+const ipFormat = /^(http:\/\/www\.|https:\/\/www\.|http:\/\/|https:\/\/)?[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,5}(:[0-9]{1,5})?(\/.*)?|^((http:\/\/www\.|https:\/\/www\.|http:\/\/|https:\/\/)?([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$/;
 
 dotenv.config();
 
@@ -17,7 +17,7 @@ client.once('ready', () => {
 client.on('message', async message => {
     if (!message.content.startsWith(prefix)) return;
 
-    let ip, data, playerOnlineString, port = 25565;
+    let ip, port = 25565;
     const args = message.content.trim().split(/ +/g); // Split by spaces
     const cmd = args[0].slice(prefix.length).toLowerCase();
     const embeddedResponse = new Discord.MessageEmbed();
@@ -79,7 +79,7 @@ function getPlayersList(playerList) {
         }
         return stringBuilder;
     }
-    return "No Players Online";
+    return "No Player Information Available";
 }
 
 function buildAttachment(favicon) {
