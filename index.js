@@ -1,6 +1,6 @@
 const Discord = require('discord.js');
 const dotenv = require('dotenv');
-const mcPinger = require('minecraft-server-ping')
+const mcPinger = require('minecraft-pinger')
 
 const client = new Discord.Client();
 
@@ -24,21 +24,25 @@ client.on('message', async message => {
     if (cmd === 'mc') {
         ip = args[1];
         if (ipFormat.test(ip)) {
-            try {
-                if (args.length === 3 && Number.isInteger(Number(args[2]))) {
-                    port = args[2];
-                }
+            if (args.length === 3 && Number.isInteger(Number(args[2]))) {
+                port = args[2];
+            }
 
+            mcPinger.ping(`${ip}`, port, async (error, data) => {
+                if (error) {
+                    message.reply("The server is not available");
+                    return console.error(error)
+                }
                 message.reply(`Pinging ${ip}::${port}`)
-                data = await mcPinger.ping(ip, port);
                 playersOnlineString = getPlayersList(data.players.sample);
+
+                console.log(data)
 
                 embeddedResponse
                     .setColor('#0099ff')
                     .setTitle(`Server: ${ip}`)
                     .setDescription(`${data.description.text}`)
-                    .setURL('https://discord.js.org/')
-                    // .setAuthor('Brad Angliss')
+                    .setAuthor("Author: Brad Angliss")
                     .addFields(
                         { name: `Players Online: ${data.players.online}`, value: `${playersOnlineString}` },
                         { name: 'Maximum Players', value: `${data.players.max}` },
@@ -47,13 +51,15 @@ client.on('message', async message => {
                     .setTimestamp()
 
                 if (data.favicon !== undefined) {
-                    embeddedResponse.setThumbnail(`${data.favicon}`);
+                    const attachment = buildAttachment(data.favicon)
+
+                    embeddedResponse
+                        .attachFiles([attachment])
+                        .setThumbnail("attachment://favicon.png");
                 }
 
                 message.reply(embeddedResponse)
-            } catch (e) {
-                message.reply("The server is not available")
-            }
+            })
         } else {
             message.reply("Invalid IP Address Given")
         }
@@ -66,8 +72,19 @@ client.login(process.env.TOKEN);
 
 function getPlayersList(playerList) {
     var stringBuilder = "";
-    for (var value of playerList) {
-        stringBuilder += value.name + "\n";
+    if (playerList != undefined) {
+        for (var value of playerList) {
+            stringBuilder += value.name + "\n";
+        }
+        return stringBuilder;
     }
-    return stringBuilder;
+    return "No Players Online";
+}
+
+function buildAttachment(favicon) {
+    var fav = favicon.split(",").slice(1).join(",");
+    var imageStream = Buffer.from(fav, "base64");
+    var attachment = new Discord.MessageAttachment(imageStream, "favicon.png");
+
+    return attachment;
 }
